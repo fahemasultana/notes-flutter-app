@@ -1,38 +1,25 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:intl/intl.dart';
+import 'package:get_it/get_it.dart';
+import 'package:my_notes/data/repository/notes_repository.dart';
 
 import '../../data/entity/note_entity.dart';
 import '../../main.dart';
 
 part 'create_note_event.dart';
-
 part 'create_note_state.dart';
 
 class CreateNoteBloc extends Bloc<CreateNoteEvent, CreateNoteState> {
+  NotesRepository notesRepository = GetIt.I.get<NotesRepository>();
   NoteEntity? noteEntity;
 
   CreateNoteBloc(this.noteEntity) : super(CreateNoteInitial()) {
     on<InsertNoteEvent>((event, emit) async {
-      DateTime now = DateTime.now();
-      final timestamp = now.millisecondsSinceEpoch;
-      if (noteEntity != null) {
-        await appDatabase.notesDao.updateNote(NoteEntity(
-          id: noteEntity!.id,
-          title: event.title,
-          description: event.description,
-          date: timestamp,
-        ));
-      } else {
-        await appDatabase.notesDao.insertNote(NoteEntity(
-          title: event.title,
-          description: event.description,
-          date: timestamp,
-        ));
-      }
-
+      await notesRepository.insertNote(
+        noteEntity?.id,
+        event.title,
+        event.description,
+      );
       emit(ClosePageState());
     });
 

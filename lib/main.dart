@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:my_notes/data/entity/note_entity.dart';
+import 'package:my_notes/data/repository/notes_repository.dart';
 import 'package:my_notes/ui/create_note/create_note_page.dart';
 import 'package:my_notes/ui/home/home_page.dart';
 import 'package:floor/floor.dart';
@@ -33,6 +35,8 @@ late final AppDatabase appDatabase;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  GetIt.I.registerSingleton(NotesRepository());
 
   appDatabase =
       await $FloorAppDatabase.databaseBuilder('app_database.db').build();

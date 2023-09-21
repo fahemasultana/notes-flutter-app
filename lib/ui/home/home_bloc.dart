@@ -1,19 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 import '../../data/entity/note_entity.dart';
+import '../../data/repository/notes_repository.dart';
 import '../../main.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  NotesRepository notesRepository = GetIt.I.get<NotesRepository>();
+
   NoteEntity? noteEntity;
 
   HomeBloc() : super(HomeInitialState()) {
     on<LoadNotesEvent>((event, emit) async {
       emit(HomeLoadingState());
 
-      final List<NoteEntity> notes =
-          await appDatabase.notesDao.findAllNotesFuture();
+      final List<NoteEntity> notes = await notesRepository.findAllNotes();
 
       emit(HomeLoadedState(notes: notes));
     });
@@ -25,9 +28,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             .where((element) => element.selected == true)
             .toList();
 
-        await appDatabase.notesDao.deleteAll(selectedNotes);
-        final List<NoteEntity> notes =
-            await appDatabase.notesDao.findAllNotesFuture();
+        await notesRepository.deleteAll(selectedNotes);
+        final List<NoteEntity> notes = await notesRepository.findAllNotes();
 
         emit(HomeLoadingState());
         emit(HomeLoadedState(notes: notes, isSelecting: false));
@@ -68,7 +70,5 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             notes: notes, isSelecting: true, totalSelected: totalSelected));
       }
     });
-
-
   }
 }
